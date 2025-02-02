@@ -17,20 +17,21 @@ def on_connect(client, userdata, flags, reason_code):
 def on_message(client, userdata, msg):
     print(msg.topic + ":  " + str(msg.payload.decode("utf-8")))
 
-mqttc = mqtt.Client()
+def init():
+    mqttc = mqtt.Client()
 
-# Definir o usuário e a senha
-mqttc.username_pw_set(MQTT_USR, MQTT_PSW)
+    # Definir o usuário e a senha
+    mqttc.username_pw_set(MQTT_USR, MQTT_PSW)
 
-# Definir callbacks
-mqttc.on_connect = on_connect
-mqttc.on_message = on_message
+    # Definir callbacks
+    mqttc.on_connect = on_connect
+    mqttc.on_message = on_message
 
-# Definir configurações TLS
-mqttc.tls_set(certfile=None, keyfile=None, tls_version=ssl.PROTOCOL_TLSv1_2)
+    # Definir configurações TLS
+    mqttc.tls_set(certfile=None, keyfile=None, tls_version=ssl.PROTOCOL_TLSv1_2)
 
-# Conectar ao broker usando TLS
-mqttc.connect(MQTT_BROKER, 8883, 60)
+    # Conectar ao broker usando TLS
+    mqttc.connect(MQTT_BROKER, 8883, 60)
 
-# Bloquear chamada que processa tráfego de rede, despacha callbacks e lida com reconexões.
-mqttc.loop_forever()
+    # Bloquear chamada que processa tráfego de rede, despacha callbacks e lida com reconexões.
+    mqttc.loop_forever()
