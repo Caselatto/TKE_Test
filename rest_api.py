@@ -2,16 +2,6 @@ import requests
 
 API_URL = "https://jsonplaceholder.typicode.com/todos"
 
-def gerar_dados_elevador(id):
-    import random
-    id = int(id)
-    return {
-        "elevator_id": id,
-        "position": random.randint(0, 10),
-        "door_status": random.choice(["open", "closed"]),
-        "weight": random.randint(0, 1000)
-    }
-
 # Função para ler dados da nuvem
 def get_data():
     response = requests.get(API_URL)
@@ -51,7 +41,7 @@ def verificar_e_printer_json(dados):
             verificar_e_printer_json(item)
 
 # Uso
-post_data(gerar_dados_elevador(1))  # Envia os dados para a API
+# post_data(gerar_dados_elevador(1))  # Envia os dados para a API
 data = get_data()  # Recupera os dados da API
 
 # if data:
