@@ -1,24 +1,27 @@
 import random
 
-# Dicionário de informações a serem medidas
-chaves = ["elevator_id", "position", "door_status", "weight"]   # Caso deseje adicionar mais informações,
-                                                                # necessário apenas adicionar o nome aqui
-                                                                # e fazer a aquisição abaixo
+# Dictionary of information to be measured
+keys = ["elevator_id", "position", "door_status", "weight"]   # If you want to add more information,
+                                                              # just add the name here
+                                                              # and make the acquisition below
 
-# Caso algum valor esteja vazio, retorna um sinal False
-def verificar_dados(dados):
-    return all(value is not None for value in dados.values())
+# If any value is empty, it returns a False signal
+def verify_data(data):
+    if any(value is None for value in data.values()):
+        print("Incomplete data!")
+        return False
+    return True
 
-# Função para realizar as medições e montar no dicionário
-def gerar_dados(keys=chaves, valores=None):
-    valores = valores or {  # Substituir por chamadas de funções para os sensores ou fonte das informações
+# Function to perform measurements and assemble the dictionary
+def generate_data(keys=keys, values=None):
+    values = values or {  # Replace with actual calls to sensors or data sources
         "elevator_id": lambda: random.randint(1, 100),
         "position": lambda: random.randint(0, 10),
         "door_status": lambda: random.choice(["open", "closed"]),
         "weight": lambda: random.randint(0, 750),
     }
-    
-    dados = {key: valores.get(key, lambda: None)() for key in keys}
-    completo = all(value is not None for value in dados.values())
-    
-    return dados, completo
+
+    data = {key: values.get(key, lambda: None)() for key in keys}
+    if verify_data(data):
+        return data, True
+    return data, False
