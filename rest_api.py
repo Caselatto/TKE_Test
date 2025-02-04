@@ -1,48 +1,44 @@
 import requests
 
-API_URL = "https://jsonplaceholder.typicode.com/todos"
+API_URL = "https://jsonplaceholder.typicode.com/todos"  # Replace with the real API URL
 
-# Função para ler dados da nuvem
+# Function to read data from the cloud
 def get_data():
-    response = requests.get(API_URL)
-    
-    if response.status_code == 200:
-        # Se a resposta for uma lista, você pode pegar o primeiro item ou iterar.
+    try:
+        response = requests.get(API_URL)
+        response.raise_for_status()  # Raises exception for HTTP errors
         return response.json()
-    else:
-        print(f"Falha ao recuperar dados: {response.status_code}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error retrieving data: {e}")
         return None
 
 # Function to send data to the cloud
 def post_data(dados):
-    response = requests.post(API_URL, json=dados)
-    print(f"Resposta do servidor após POST: {response.status_code} - {response.text}")  # Verifique a resposta do servidor
-    
-    if response.status_code in [200, 201]:
-        print(f"Dados enviados com sucesso")
-        return response.json()
-    else:
-        print(f"Falha ao enviar dados: {response.status_code}")
+    try:
+        response = requests.post(API_URL, json=dados)
+        print(f"Response from server after POST: {response.status_code} - {response.text}")
+        response.raise_for_status()  # Raises exception for HTTP errors
+
+        if response.status_code in [200, 201]:
+            print("Data sent successfully")
+            return response.json()
+        else:
+            print(f"Failed to send data: {response.status_code}")
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error sending data: {e}")
         return None
 
-# Função para verificar os dados
-def verificar_e_printer_json(dados):
-    chaves_esperadas = ["elevator_id", "position", "door_status", "weight"]
-    
-    # Verificar se o item é um dicionário (único objeto)
-    if isinstance(dados, dict):
-        if all(chave in dados for chave in chaves_esperadas):
-            for chave, valor in dados.items():
-                print(f"{chave}: {valor}")
+# Function to verify and print data
+def verify_and_print_json(data):
+    expected_keys = ["elevator_id", "position", "door_status", "weight"]
+
+    if isinstance(data, dict):
+        if all(key in data for key in expected_keys):
+            for key, value in data.items():
+                print(f"{key}: {value}")
         else:
-            print(".", end="")
-    elif isinstance(dados, list):  # Se for uma lista, itere pelos itens
-        for item in dados:
-            verificar_e_printer_json(item)
-
-# Uso
-# post_data(gerar_dados_elevador(1))  # Envia os dados para a API
-data = get_data()  # Recupera os dados da API
-
-# if data:
-#     verificar_e_printer_json(data)  # Verifica e imprime os dados
+            print("Incomplete data.", end=" ")
+    elif isinstance(data, list):  # If it's a list, iterate through the items
+        for item in data:
+            verify_and_print_json(item)
