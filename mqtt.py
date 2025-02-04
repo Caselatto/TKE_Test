@@ -6,6 +6,8 @@ MQTT_PSW = "Abc123**"
 MQTT_TOPIC = "elevator_1"
 MQTT_BROKER = "3d04701073de45d6a59a96eaa0b0d39e.s1.eu.hivemq.cloud"
 
+MQTT_PALAVRA_CHAVE = "MAINTENANCE_STOP"
+
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, reason_code):
     print(f"Connected with result code {reason_code}")
@@ -15,7 +17,9 @@ def on_connect(client, userdata, flags, reason_code):
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    print(msg.topic + ":  " + str(msg.payload.decode("utf-8")))
+    message = msg.payload.decode()
+    if MQTT_PALAVRA_CHAVE in message:
+        print("Encontrado")
 
 def init():
     mqttc = mqtt.Client()
