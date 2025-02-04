@@ -8,45 +8,53 @@ MQTT_BROKER = "3d04701073de45d6a59a96eaa0b0d39e.s1.eu.hivemq.cloud"
 
 MQTT_COMANDOS = ["manutencao begin", "manutencao end", "go to", "get level"]
 
-# The callback for when the client receives a CONNACK response from the server.
+# Callback when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, reason_code):
     print(f"Connected with result code {reason_code}")
-    # Subscribing in on_connect() means that if we lose the connection and
-    # reconnect then subscriptions will be renewed.
-    client.subscribe(MQTT_TOPIC)
+    try:
+        # Subscribing in on_connect() means that if we lose the connection and
+        # reconnect then subscriptions will be renewed.
+        client.subscribe(MQTT_TOPIC)
+    except Exception as e:
+        print(f"Error subscribing to topic: {e}")
 
-# The callback for when a PUBLISH message is received from the server.
+# Callback when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    message = msg.payload.decode()
-    
-    for comando in MQTT_COMANDOS:
-        if comando == "go to":
-            padrao = rf"{comando}\s+(\d+)"
-            match = re.search(padrao, message)
-            if match:
-                valor = match.group(1)
-                print(f"Comando: {comando}, Valor: {valor}")
-            elif message.startswith("go to"):
-                print("Comando 'go to' recebido sem valor numérico válido.")
-        else:
-            if message == comando:
-                print(f"Comando recebido: {comando}")
+    try:
+        message = msg.payload.decode()
+        for comando in MQTT_COMANDOS:
+            if comando == "go to":
+                padrao = rf"{comando}\s+(\d+)"
+                match = re.search(padrao, message)
+                if match:
+                    valor = match.group(1)
+                    print(f"Command: {comando}, Value: {valor}")
+                elif message.startswith("go to"):
+                    print("Command 'go to' received without a valid numeric value.")
+            else:
+                if message == comando:
+                    print(f"Command received: {comando}")
+    except Exception as e:
+        print(f"Error processing the message: {e}")
 
 def init():
     mqttc = mqtt.Client()
 
-    # Definir o usuário e a senha
-    mqttc.username_pw_set(MQTT_USR, MQTT_PSW)
+    try:
+        # Set username and password
+        mqttc.username_pw_set(MQTT_USR, MQTT_PSW)
 
-    # Definir callbacks
-    mqttc.on_connect = on_connect
-    mqttc.on_message = on_message
+        # Set callbacks
+        mqttc.on_connect = on_connect
+        mqttc.on_message = on_message
 
-    # Definir configurações TLS
-    mqttc.tls_set(certfile=None, keyfile=None, tls_version=ssl.PROTOCOL_TLSv1_2)
+        # Set TLS configurations
+        mqttc.tls_set(certfile=None, keyfile=None, tls_version=ssl.PROTOCOL_TLSv1_2)
 
-    # Conectar ao broker usando TLS
-    mqttc.connect(MQTT_BROKER, 8883, 60)
+        # Connect to the broker using TLS
+        mqttc.connect(MQTT_BROKER, 8883, 60)
 
-    # Bloquear chamada que processa tráfego de rede, despacha callbacks e lida com reconexões.
-    mqttc.loop_forever()
+        # Block the call that processes network traffic, dispatches callbacks, and handles reconnections.
+        mqttc.loop_start()  # Using loop_start() to allow parallel execution
+    except Exception as e:
+        print(f"Error connecting to MQTT broker: {e}")
