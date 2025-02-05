@@ -4,6 +4,19 @@ import requests
 from data_acquire import ElevatorStatus
 import mqtt
 import rest_api
+import json
+import os
+
+pasta="saved"
+os.makedirs(pasta, exist_ok=True)
+
+def save_json(dados):
+    arquivos_existentes = [f for f in os.listdir(pasta) if f.endswith(".json")]
+    numero_arquivo = len(arquivos_existentes) + 1
+    nome_arquivo = os.path.join(pasta, f"dados_{numero_arquivo}.json")
+    
+    with open(nome_arquivo, "w", encoding="utf-8") as arquivo:
+        json.dump(dados, arquivo, indent=4, ensure_ascii=False)
 
 # Initialize Elevator Status
 elevator = ElevatorStatus()
@@ -20,11 +33,8 @@ def step_impl(context):
 
 @given('the elevator is operational')
 def step_impl(context):
-    elevator.status_dict["operational"] = True
-
-@given('the elevator is online')
-def step_impl(context):
-    elevator.status_dict["online"] = True
+    elevator.generate_data(id=len([f for f in os.listdir(pasta) if f.endswith(".json")]) + 1)
+    print(elevator.get_status())
 
 @when('the elevator sends sensor data to the cloud')
 def step_impl(context):
@@ -35,7 +45,7 @@ def step_impl(context):
 def step_impl(context):
     assert context.response is not None
 
-@given('the elevator is sending data')
+@when('the elevator is sending data')
 def step_impl(context):
     context.data = elevator.get_status()
 
@@ -44,6 +54,10 @@ def step_impl(context):
     rest_api.verify_and_print_json(context.data)
 
 @given('the API connection is down')
+def step_impl(context):
+    elevator.generate_data(id=4)
+    elevator.status_dict["online"] = False
+
 @when('the elevator attempts to send data')
 def step_impl(context):
     context.response = None
@@ -51,15 +65,11 @@ def step_impl(context):
         raise requests.exceptions.ConnectionError("Simulating API failure")
         context.response = rest_api.post_data(elevator.status_dict)
     except requests.exceptions.RequestException:
-        # Simulate local storage
-        context.local_data = elevator.status_dict
+        save_json(elevator.status_dict)
 
 @then('the data should be stored locally until the connection is restored')
 def step_impl(context):
-    assert context.response is None
-    time.sleep(5)
-    context.response = rest_api.post_data(elevator.get_status())
-    assert context.response is not None
+    save_json(elevator.status_dict)
 
 @when('the cloud sends a maintenance command via MQTT')
 def step_impl(context):

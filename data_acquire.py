@@ -31,6 +31,9 @@ class ElevatorStatus:
     # Function to simulate the acquisition of new data
     def generate_data(self, id):
         self.status_dict["elevator_id"] = id
+        self.status_dict["operational"] = True
+        self.status_dict["online"] = True
+        self.status_dict["maintenance"] = False
         self.status_dict["position"] = random.randint(0, 10)
         self.status_dict["door_status"] = random.choice(["open", "closed"])
         self.status_dict["weight"] = random.randint(0, 750)
