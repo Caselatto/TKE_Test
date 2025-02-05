@@ -31,7 +31,8 @@ def post_data(dados):
 
 # Function to verify and print data
 def verify_and_print_json(data):
-    expected_keys = ["elevator_id", "position", "door_status", "weight"]
+    from data_acquire import elevator_status
+    expected_keys = list(elevator_status.keys())
 
     if isinstance(data, dict):
         if all(key in data for key in expected_keys):

@@ -3,6 +3,9 @@ import random
 # The dictionary holding the elevator status, kept outside the class
 elevator_status = {
     "elevator_id": None,
+    "operational": None,
+    "online": None,
+    "maintenance": None,
     "position": None,
     "door_status": None,
     "weight": None
@@ -31,3 +34,6 @@ class ElevatorStatus:
         self.status_dict["position"] = random.randint(0, 10)
         self.status_dict["door_status"] = random.choice(["open", "closed"])
         self.status_dict["weight"] = random.randint(0, 750)
+
+    def get_status(self):
+        return self.status_dict
