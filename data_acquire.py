@@ -40,3 +40,15 @@ class ElevatorStatus:
 
     def get_status(self):
         return self.status_dict
+
+    def check_limits(self):
+        limits = {
+            "position": (0, 10),  # Position should be between 0 and 100
+            "weight": (0, 750)    # Weight should be between 0 and 750
+        }
+        for key, (min_val, max_val) in limits.items():
+            value = self.status_dict.get(key)
+            if value is not None and (value < min_val or value > max_val):
+                print(f"Warning: {key} is out of range ({value})")
+                return False
+        return True

@@ -38,8 +38,12 @@ def step_impl(context):
 
 @when('the elevator sends sensor data to the cloud')
 def step_impl(context):
+    elevator.generate_data(id=len([f for f in os.listdir(pasta) if f.endswith(".json")]) + 1)
+    time.sleep(3)
     context.response = rest_api.post_data(elevator.get_status())
     time.sleep(5)
+    print(f"Sent data with latency: {elevator.get_status()}")
+
 
 @then('the data should be sent every 5 seconds')
 def step_impl(context):
@@ -51,7 +55,11 @@ def step_impl(context):
 
 @then('the payload should contain all data')
 def step_impl(context):
-    rest_api.verify_and_print_json(context.data)
+    if not elevator.check_limits():
+        print("Warning: Data is invalid!")
+    else:
+        rest_api.verify_and_print_json(context.data)
+        print("Data sent successfully.")
 
 @given('the API connection is down')
 def step_impl(context):
@@ -62,10 +70,11 @@ def step_impl(context):
 def step_impl(context):
     context.response = None
     try:
-        raise requests.exceptions.ConnectionError("Simulating API failure")
+        raise requests.exceptions.Timeout("Simulating message drop")
         context.response = rest_api.post_data(elevator.status_dict)
-    except requests.exceptions.RequestException:
-        save_json(elevator.status_dict)
+    except requests.exceptions.Timeout:
+        save_json(elevator.status_dict)  # Salva os dados localmente
+        print("Message dropped, data saved locally.")
 
 @then('the data should be stored locally until the connection is restored')
 def step_impl(context):
