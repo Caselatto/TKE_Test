@@ -6,7 +6,7 @@ MQTT_PSW = "Abc123**"
 MQTT_TOPIC = "elevator_1"
 MQTT_BROKER = "3d04701073de45d6a59a96eaa0b0d39e.s1.eu.hivemq.cloud"
 
-MQTT_COMANDOS = ["manutencao begin", "manutencao end", "go to", "get level"]
+MQTT_COMANDOS = ["maintenance begin", "maintenance end", "go to", "get level"]
 
 # Callback when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, reason_code):
@@ -20,8 +20,10 @@ def on_connect(client, userdata, flags, reason_code):
 
 # Callback when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
+    comand_received(msg.payload.decode())
+
+def comand_received(message):
     try:
-        message = msg.payload.decode()
         for comando in MQTT_COMANDOS:
             if comando == "go to":
                 padrao = rf"{comando}\s+(\d+)"
